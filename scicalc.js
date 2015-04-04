@@ -3,13 +3,27 @@
  * Version:            0.1
  * Author:             Ryan Fung
  * Date created:       2014-04-16
- * Date last modified: 2014-04-16
+ * Date last modified: 2015-04-04
+ https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp
  */
 
-var baseUnits = ["kg","m","s","A","K","mol","cd"];
+var baseUnits = ["kg", "m", "s", "A", "K", "mol", "cd"];
 var unitData = {}; // global units dataset
 var dimData = {}; // global Dimensions dataset
 var scicalcInputListener = $("#scicalcSubmit").addEventListener("click",parseInput);
+
+// Regular Expressions
+var re = {
+	number: /[(0-9)]/g,
+	letter: /[(A-Za-z)]/g,
+	operator: /[(\+\-\*\/\=\(\))]/g
+};
+// Regular Expressions, discard search
+var red = {
+	number: /[0-9]/g,
+	letter: /[A-Za-z]/g,
+	operator: /[\+\-\*\/\=\(\)]/g
+};
 
 window.onload=function(){
     var element = document.createElement("p");
@@ -22,11 +36,11 @@ window.onload=function(){
     }
 }
 
-function makeNum(id,value,units){
+function makeNum(id, value, units){
     dimData[id] = new dim(value,units);
 }
 
-function dim(value,units){ // new Dimension
+function dim(value, units){ // new Dimension
     this.value = value;
     this.units = units;
 }
