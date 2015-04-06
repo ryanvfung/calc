@@ -9,12 +9,12 @@ Introduction
 
 **Created**: 2013-12-21
 
-**Last Modified**: 2015-04-04
+**Last Modified**: 2015-04-06
 
 
 Current Features
 ----------------
-* Add 2 numbers together
+* Addition of numbers
 
 
 Upcoming Features to be Implemented
@@ -24,5 +24,5 @@ Upcoming Features to be Implemented
 
 Change log
 ----------
-### 201#-##-## Version 0.1
+### 2015-##-## Version 0.1
 * Initial release

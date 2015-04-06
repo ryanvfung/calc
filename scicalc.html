@@ -6,7 +6,9 @@
 <script type='text/javascript' src='scicalc.js'></script>
 </head><body>
 <p><button onclick='var a=document.createElement('script');a.src='data/constants.js';document.head.appendChild(a);this.parentElement.removeChild(this);' >Load <tt>constants.js</tt> dimensions file</button></p>
-<input id='scicalcInput' placeholder='Input expression for parsing' />
-<button id='scicalcSubmit' type='submit'>Calculate!</button>
+<form id='scicalcForm'>
+	<input id='scicalcInput' placeholder='Input expression for parsing' />
+	<button id='scicalcSubmit' type='submit'>Calculate!</button>
+</form>
 <div id='scicalcOutput'></div>
 </body></html>
