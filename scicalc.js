@@ -1,9 +1,9 @@
 /*
- * Title:			  SciCalc - Scientific Calculator Module
- * Version:			0.1
- * Author:			 Ryan Fung
+ * Title:              SciCalc - Scientific Calculator Module
+ * Version:            0.1
+ * Author:             Ryan Fung
  * Date created:	   2014-04-16
- * Date last modified: 2015-04-06
+ * Date last modified: 2015-04-07
  */
 
 var baseUnits = ['kg', 'm', 's', 'A', 'K', 'mol', 'cd'];
@@ -26,17 +26,28 @@ var red = {
 	operator: /[\+\-\*\/\=]/g,
 	nan: /[\+\-\*\/\=\(\)]/g
 };
+// Regular Expressions for operations
+var reo = {
+	1: /[\^]/g,
+	2: /[*\/]/g,
+	3: /[\+\-]/g
+}
 
 window.onload = function() {
-	$('#scicalcSubmit').on('click', parseInput);
+	$('#scicalcSubmit').on('click', function () {
+		checkInput($('#scicalcInput').val());
+	});
 	$('#scicalcForm').submit(function () {
 		// parseInput();
 		return false;
 	});
+	$('#scicalcInput').focus();
 	writeMessage('<code>scicalc.js</code> successfully loaded!');
 	for(i in siUnits){
 		var a = 0;
-		for(j in siUnits[i][1]){a+=j}
+		for (j in siUnits[i][1]) {
+			a += j;
+		}
 		unitData[siUnits[i][0]] = siUnits[i][1];
 	}
 }
@@ -56,17 +67,28 @@ function multiply (num1, num2) {
 	);
 }
 
-function add (num1, num2) {
-	if (num1.units !== num2.units) {
-		raiseError('Dimension mismatch');
+function add (num1, num2, subtract) {
+	if (
+		num1.units[0] == num2.units[0] &&
+		num1.units[1] == num2.units[1] &&
+		num1.units[2] == num2.units[2] &&
+		num1.units[3] == num2.units[3] &&
+		num1.units[4] == num2.units[4] &&
+		num1.units[5] == num2.units[5] &&
+		num1.units[6] == num2.units[6]
+	) {
+		if (!subtract) {
+			return new dim(num1.value + num2.value, num1.units);
+		} else {
+			return new dim(num1.value - num2.value, num1.units);
+		}
 	} else {
-		return new dim(num1.value + num2.value, num1.units);
+		raiseError('Dimension mismatch');
 	}
 }
 
-function parseInput(){ // parse input expression
-	var str = $('#scicalcInput')[0].value;
-	var exp = str.split(re.nan);
+function parseInput(input){ // parse input expression
+	var exp = input.split(re.nan);
 	
 	// convert numbers to object
 	for (var i = 0; i < exp.length; i++) {
@@ -74,8 +96,6 @@ function parseInput(){ // parse input expression
 			exp[i] = new dim(Number(exp[i]), 0);
 		}
 	}
-	
-	console.log(exp);
 	
 	// perform multiplication
 	for (var i = 0; i < exp.length; i++) {
@@ -85,20 +105,40 @@ function parseInput(){ // parse input expression
 		}
 	}
 	
-	// perform addition
-	for (var i = 0; i < exp.length; i++) {
-		if (exp[i] == '+' && i > 0 && i < exp.length) {
-			exp.splice(i-1, 3, add(exp[i-1], exp[i+1]));
-			i--;
+	// perform priority 3 operations
+	for (var i = 1; i < exp.length - 1; i++) {
+		console.log("exp[i].split(reo[1]).join('')  =  "+String(exp[i].split(reo[3]).join('')));
+		if (exp[i].split(reo[3]).join('')=='') {
+			// perform addition
+			if (exp[i] == '+') {
+				console.log('addition');
+				exp.splice(i-1, 3, add(exp[i-1], exp[i+1]));
+				i--;
+			}
+			// perform subtraction
+			if (exp[i] == '-') {
+				console.log('subtraction');
+				exp.splice(i-1, 3, add(exp[i-1], exp[i+1], true));
+				i--;
+			}
 		}
+		console.log('i  =  '+i);
+		console.log('exp[i]  =  '+exp[i]);
 	}
 	
 	if(exp.length != 1) {
 		raiseError('Not all operations performed on calculation');
-		console.log('ERROR! exp.length:' + exp.length);
 		console.log(exp);
 	} else {
-		writeMessage(str + ' = ' + exp[0]);
+		return exp[0];
+	}
+}
+
+function checkInput (input) {
+	if ( input.split(/\s/g).join('') !== '' ) {
+		var result = parseInput(input);
+		console.log(result);
+		writeMessage(input + ' = ' + result);
 	}
 }
 
@@ -114,6 +154,7 @@ function dim(value, units) { // new Dimension
 		this.units = units;
 	}
 }
+dim.prototype.toString = function () {return String(this.value)};
 
 function ungroup(s) { // extract expression from inside round brackets
 	try {
@@ -139,6 +180,6 @@ function writeMessage(msg) {
 }
 
 function raiseError(msg) {
-	writeMessage(msg);
-	console.log(msg);
+	writeMessage('Error' + msg);
+	console.log('Error' + msg);
 }
