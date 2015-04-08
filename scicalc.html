@@ -1,9 +1,12 @@
 <!DOCTYPE html><html><head>
 <title>SciCalc</title>
 <link rel='stylesheet' type='text/css' href='scicalc.css' />
+<link rel='stylesheet' type='text/css' href='qunit-1.18.0.css' />
 <script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js'></script>
 <script type='text/javascript' src='data/si-units.js'></script>
 <script type='text/javascript' src='scicalc.js'></script>
+<script type='text/javascript' src='qunit-1.18.0.js'></script>
+<script type='text/javascript' src='scicalc-test.js'></script>
 </head><body>
 <p><button onclick='var a=document.createElement('script');a.src='data/constants.js';document.head.appendChild(a);this.parentElement.removeChild(this);' >Load <tt>constants.js</tt> dimensions file</button></p>
 <form id='scicalcForm'>
@@ -11,4 +14,5 @@
 	<button id='scicalcSubmit' type='submit'>Calculate!</button>
 </form>
 <div id='scicalcOutput'></div>
+<div id='qunit'></div>
 </body></html>

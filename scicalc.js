@@ -52,41 +52,6 @@ window.onload = function() {
 	}
 }
 
-function multiply (num1, num2) {
-	return new dim(
-		num1.value * num2.value,
-		[
-			num1.units[0] + num2.units[0],
-			num1.units[1] + num2.units[1],
-			num1.units[2] + num2.units[2],
-			num1.units[3] + num2.units[3],
-			num1.units[4] + num2.units[4],
-			num1.units[5] + num2.units[5],
-			num1.units[6] + num2.units[6]
-		]
-	);
-}
-
-function add (num1, num2, subtract) {
-	if (
-		num1.units[0] == num2.units[0] &&
-		num1.units[1] == num2.units[1] &&
-		num1.units[2] == num2.units[2] &&
-		num1.units[3] == num2.units[3] &&
-		num1.units[4] == num2.units[4] &&
-		num1.units[5] == num2.units[5] &&
-		num1.units[6] == num2.units[6]
-	) {
-		if (!subtract) {
-			return new dim(num1.value + num2.value, num1.units);
-		} else {
-			return new dim(num1.value - num2.value, num1.units);
-		}
-	} else {
-		raiseError('Dimension mismatch');
-	}
-}
-
 function parseInput(input){ // parse input expression
 	var exp = input.split(re.nan);
 	
@@ -142,8 +107,39 @@ function checkInput (input) {
 	}
 }
 
-function makeNum(id, value, units) {
-	dimData[id] = new dim(value,units);
+function multiply (num1, num2) {
+	return new dim(
+		num1.value * num2.value,
+		[
+			num1.units[0] + num2.units[0],
+			num1.units[1] + num2.units[1],
+			num1.units[2] + num2.units[2],
+			num1.units[3] + num2.units[3],
+			num1.units[4] + num2.units[4],
+			num1.units[5] + num2.units[5],
+			num1.units[6] + num2.units[6]
+		]
+	);
+}
+
+function add (num1, num2, subtract) {
+	if (
+		num1.units[0] == num2.units[0] &&
+		num1.units[1] == num2.units[1] &&
+		num1.units[2] == num2.units[2] &&
+		num1.units[3] == num2.units[3] &&
+		num1.units[4] == num2.units[4] &&
+		num1.units[5] == num2.units[5] &&
+		num1.units[6] == num2.units[6]
+	) {
+		if (!subtract) {
+			return new dim(num1.value + num2.value, num1.units);
+		} else {
+			return new dim(num1.value - num2.value, num1.units);
+		}
+	} else {
+		raiseError('Dimension mismatch');
+	}
 }
 
 function dim(value, units) { // new Dimension
@@ -153,8 +149,42 @@ function dim(value, units) { // new Dimension
 	} else {
 		this.units = units;
 	}
+	this.equal = function (arg) {
+		if (arg instanceof dim) {
+			return this.identical(arg);
+		} else if (typeof(arg=='number')) {
+			return this.value == arg
+		}
+	}
+	this.identical = function (arg) {
+		if (arg instanceof dim) {
+			return this.identical(dim2);
+			if (
+				this.value == dim2.value &&
+				this.units[0] == dim2.units[0] &&
+				this.units[1] == dim2.units[1] &&
+				this.units[2] == dim2.units[2] &&
+				this.units[3] == dim2.units[3] &&
+				this.units[4] == dim2.units[4] &&
+				this.units[5] == dim2.units[5] &&
+				this.units[6] == dim2.units[6]
+				// && this.mag == dim2.mag
+			) {
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			return false;
+		}
+	}
 }
 dim.prototype.toString = function () {return String(this.value)};
+
+
+function makeNum(id, value, units) {
+	dimData[id] = new dim(value,units);
+}
 
 function ungroup(s) { // extract expression from inside round brackets
 	try {
