@@ -62,11 +62,21 @@ function parseInput(input){ // parse input expression
 		}
 	}
 	
-	// perform multiplication
-	for (var i = 0; i < exp.length; i++) {
-		if (exp[i] == '*' && i > 0 && i < exp.length) {
-			exp.splice(i-1, 3, multiply(exp[i-1], exp[i+1]));
-			i--;
+	// perform priority 2 operations
+	for (var i = 1; i < exp.length - 1; i++) {
+		if (exp[i].split(reo[2]).join('')=='') {
+			// perform multiplication
+			if (exp[i] == '*') {
+				console.log('multiplication');
+				exp.splice(i-1, 3, multiply(exp[i-1], exp[i+1]));
+				i--;
+			}
+			// perform division
+			if (exp[i] == '/') {
+				console.log('division');
+				exp.splice(i-1, 3, multiply(exp[i-1], exp[i+1], true));
+				i--;
+			}
 		}
 	}
 	
@@ -107,19 +117,34 @@ function checkInput (input) {
 	}
 }
 
-function multiply (num1, num2) {
-	return new dim(
-		num1.value * num2.value,
-		[
-			num1.units[0] + num2.units[0],
-			num1.units[1] + num2.units[1],
-			num1.units[2] + num2.units[2],
-			num1.units[3] + num2.units[3],
-			num1.units[4] + num2.units[4],
-			num1.units[5] + num2.units[5],
-			num1.units[6] + num2.units[6]
-		]
-	);
+function multiply (num1, num2, divide) {
+	if (!divide) {
+		return new dim(
+			num1.value * num2.value,
+			[
+				num1.units[0] + num2.units[0],
+				num1.units[1] + num2.units[1],
+				num1.units[2] + num2.units[2],
+				num1.units[3] + num2.units[3],
+				num1.units[4] + num2.units[4],
+				num1.units[5] + num2.units[5],
+				num1.units[6] + num2.units[6]
+			]
+		);
+	} else {
+		return new dim(
+			num1.value / num2.value,
+			[
+				num1.units[0] - num2.units[0],
+				num1.units[1] - num2.units[1],
+				num1.units[2] - num2.units[2],
+				num1.units[3] - num2.units[3],
+				num1.units[4] - num2.units[4],
+				num1.units[5] - num2.units[5],
+				num1.units[6] - num2.units[6]
+			]
+		);
+	}
 }
 
 function add (num1, num2, subtract) {
