@@ -16,7 +16,7 @@ var re = {
 	letter: /([A-Za-z])/g,
 	bracket: /([\(\)])/g,
 	operator: /([\+\-\*\/\=])/g,
-	nan: /([\+\-\*\/\=\(\)])/g
+	nan: /([\+\-\*\/\^\=\(\)])/g
 };
 // Regular Expressions, discard search parameters
 var red = {
@@ -24,7 +24,7 @@ var red = {
 	letter: /[A-Za-z]/g,
 	bracket: /[\(\)]/g,
 	operator: /[\+\-\*\/\=]/g,
-	nan: /[\+\-\*\/\=\(\)]/g
+	nan: /[\+\-\*\/\^\=\(\)]/g
 };
 // Regular Expressions for operations
 var reo = {
@@ -61,44 +61,56 @@ function parseInput(input){ // parse input expression
 			exp[i] = new dim(Number(exp[i]), 0);
 		}
 	}
+	// perform priority 1 operations
+	for (var i = 1; i < exp.length - 1; i++) {
+		if (!(exp[i] instanceof dim)) {
+			if (exp[i].split(reo[1]).join('')=='') {
+				// perform exponentiation
+				if (exp[i] == '^') {
+					exp.splice(i-1, 3, power(exp[i-1], exp[i+1]));
+					i--;
+				}
+			}
+		}
+	}
 	
 	// perform priority 2 operations
 	for (var i = 1; i < exp.length - 1; i++) {
-		if (exp[i].split(reo[2]).join('')=='') {
-			// perform multiplication
-			if (exp[i] == '*') {
-				console.log('multiplication');
-				exp.splice(i-1, 3, multiply(exp[i-1], exp[i+1]));
-				i--;
-			}
-			// perform division
-			if (exp[i] == '/') {
-				console.log('division');
-				exp.splice(i-1, 3, multiply(exp[i-1], exp[i+1], true));
-				i--;
+		if (!(exp[i] instanceof dim)) {
+			if (exp[i].split(reo[2]).join('')=='') {
+				// perform multiplication
+				if (exp[i] == '*') {
+					exp.splice(i-1, 3, multiply(exp[i-1], exp[i+1]));
+					i--;
+				}
+				// perform division
+				if (exp[i] == '/') {
+					exp.splice(i-1, 3, multiply(exp[i-1], exp[i+1], true));
+					i--;
+				}
 			}
 		}
 	}
 	
 	// perform priority 3 operations
 	for (var i = 1; i < exp.length - 1; i++) {
-		console.log("exp[i].split(reo[1]).join('')  =  "+String(exp[i].split(reo[3]).join('')));
-		if (exp[i].split(reo[3]).join('')=='') {
-			// perform addition
-			if (exp[i] == '+') {
-				console.log('addition');
-				exp.splice(i-1, 3, add(exp[i-1], exp[i+1]));
-				i--;
-			}
-			// perform subtraction
-			if (exp[i] == '-') {
-				console.log('subtraction');
-				exp.splice(i-1, 3, add(exp[i-1], exp[i+1], true));
-				i--;
+//		console.log("exp[i].split(reo[1]).join('')  =  "+String(exp[i].split(reo[3]).join('')));
+		if (!(exp[i] instanceof dim)) {
+			if (exp[i].split(reo[3]).join('')=='') {
+				// perform addition
+				if (exp[i] == '+') {
+					exp.splice(i-1, 3, add(exp[i-1], exp[i+1]));
+					i--;
+				}
+				// perform subtraction
+				if (exp[i] == '-') {
+					exp.splice(i-1, 3, add(exp[i-1], exp[i+1], true));
+					i--;
+				}
 			}
 		}
-		console.log('i  =  '+i);
-		console.log('exp[i]  =  '+exp[i]);
+//		console.log('i  =  '+i);
+//		console.log('exp[i]  =  '+exp[i]);
 	}
 	
 	if(exp.length != 1) {
@@ -117,9 +129,37 @@ function checkInput (input) {
 	}
 }
 
+function power (num1, num2) {
+	if (
+		!num2.units[0] &&
+		!num2.units[1] &&
+		!num2.units[2] &&
+		!num2.units[3] &&
+		!num2.units[4] &&
+		!num2.units[5] &&
+		!num2.units[6]
+	) {
+		console.log(Math.pow(num1.value, num2.value));
+		return new dim (
+			Math.pow(num1.value, num2.value),
+			[
+				num1.units[0] * num2.value,
+				num1.units[1] * num2.value,
+				num1.units[2] * num2.value,
+				num1.units[3] * num2.value,
+				num1.units[4] * num2.value,
+				num1.units[5] * num2.value,
+				num1.units[6] * num2.value
+			]
+		)
+	} else {
+		raiseError('Cannot raise to power of a dimensioned value');
+	}
+}
+
 function multiply (num1, num2, divide) {
 	if (!divide) {
-		return new dim(
+		return new dim (
 			num1.value * num2.value,
 			[
 				num1.units[0] + num2.units[0],
@@ -132,7 +172,7 @@ function multiply (num1, num2, divide) {
 			]
 		);
 	} else {
-		return new dim(
+		return new dim (
 			num1.value / num2.value,
 			[
 				num1.units[0] - num2.units[0],
