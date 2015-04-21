@@ -52,15 +52,8 @@ window.onload = function() {
 	}
 }
 
-function parseInput(input){ // parse input expression
-	var exp = input.split(re.nan);
-	
-	// convert numbers to object
-	for (var i = 0; i < exp.length; i++) {
-		if (!(re.nan.test(exp[i]))) {
-			exp[i] = new dim(Number(exp[i]), 0);
-		}
-	}
+function parseInput(exp){ // parse input expression
+
 	// perform priority 1 operations
 	for (var i = 1; i < exp.length - 1; i++) {
 		if (!(exp[i] instanceof dim)) {
@@ -123,10 +116,23 @@ function parseInput(input){ // parse input expression
 
 function checkInput (input) {
 	if ( input.split(/\s/g).join('') !== '' ) {
-		var result = parseInput(input);
+		var result = processInput(input);
 		console.log(result);
 		writeMessage(input + ' = ' + result);
 	}
+}
+
+function processInput (input) {
+	var exp = input.split(re.nan);
+
+	// convert numbers to object
+	for (var i = 0; i < exp.length; i++) {
+		if (!(re.nan.test(exp[i]))) {
+			exp[i] = new dim(Number(exp[i]), 0);
+		}
+	}
+
+	return parseInput(exp);
 }
 
 function power (num1, num2) {
