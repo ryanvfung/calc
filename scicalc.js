@@ -3,7 +3,7 @@
  * Version:            0.1
  * Author:             Ryan Fung
  * Date created:	   2014-04-16
- * Date last modified: 2015-04-07
+ * Date last modified: 2015-04-21
  */
 
 var baseUnits = ['kg', 'm', 's', 'A', 'K', 'mol', 'cd'];
@@ -85,7 +85,7 @@ function parseInput(input){ // parse input expression
 				}
 				// perform division
 				if (exp[i] == '/') {
-					exp.splice(i-1, 3, multiply(exp[i-1], exp[i+1], true));
+					exp.splice(i-1, 3, divide(exp[i-1], exp[i+1]));
 					i--;
 				}
 			}
@@ -104,7 +104,7 @@ function parseInput(input){ // parse input expression
 				}
 				// perform subtraction
 				if (exp[i] == '-') {
-					exp.splice(i-1, 3, add(exp[i-1], exp[i+1], true));
+					exp.splice(i-1, 3, subtract(exp[i-1], exp[i+1]));
 					i--;
 				}
 			}
@@ -157,22 +157,24 @@ function power (num1, num2) {
 	}
 }
 
-function multiply (num1, num2, divide) {
-	if (!divide) {
-		return new dim (
-			num1.value * num2.value,
-			[
-				num1.units[0] + num2.units[0],
-				num1.units[1] + num2.units[1],
-				num1.units[2] + num2.units[2],
-				num1.units[3] + num2.units[3],
-				num1.units[4] + num2.units[4],
-				num1.units[5] + num2.units[5],
-				num1.units[6] + num2.units[6]
-			]
-		);
-	} else {
-		return new dim (
+function multiply (num1, num2) {
+	return new dim (
+		num1.value * num2.value,
+		[
+			num1.units[0] + num2.units[0],
+			num1.units[1] + num2.units[1],
+			num1.units[2] + num2.units[2],
+			num1.units[3] + num2.units[3],
+			num1.units[4] + num2.units[4],
+			num1.units[5] + num2.units[5],
+			num1.units[6] + num2.units[6]
+		]
+	);
+}
+
+function divide (num1, num2) {
+	if ( num2.value != 0 ) {
+		return new dim(
 			num1.value / num2.value,
 			[
 				num1.units[0] - num2.units[0],
@@ -184,10 +186,12 @@ function multiply (num1, num2, divide) {
 				num1.units[6] - num2.units[6]
 			]
 		);
+	} else {
+		raiseError('Divide by zero');
 	}
 }
 
-function add (num1, num2, subtract) {
+function add (num1, num2) {
 	if (
 		num1.units[0] == num2.units[0] &&
 		num1.units[1] == num2.units[1] &&
@@ -197,14 +201,14 @@ function add (num1, num2, subtract) {
 		num1.units[5] == num2.units[5] &&
 		num1.units[6] == num2.units[6]
 	) {
-		if (!subtract) {
-			return new dim(num1.value + num2.value, num1.units);
-		} else {
-			return new dim(num1.value - num2.value, num1.units);
-		}
+		return new dim(num1.value + num2.value, num1.units);
 	} else {
 		raiseError('Dimension mismatch');
 	}
+}
+
+function subtract (num1, num2) {
+	return add(num1, new dim(-num2.value, num2.units));
 }
 
 function dim(value, units) { // new Dimension
