@@ -124,14 +124,38 @@ function checkInput (input) {
 
 function processInput (input) {
 	var exp = input.split(re.nan);
-
+	
+	// remove extra array item at start if input string starts with something that is not a number
+	if (exp[0].split(re.nan).join('') === '' ) {
+		exp.shift();
+	}
+	
+	// remove extra array item at end if input string ends with something that is not a number
+	if (exp[exp.length-1].split(re.nan).join('') === '' ) {
+		exp.pop();
+	}
+	
 	// convert numbers to object
 	for (var i = 0; i < exp.length; i++) {
-		if (!(re.nan.test(exp[i]))) {
+		if (!re.nan.test(exp[i])) {
 			exp[i] = new dim(Number(exp[i]), 0);
 		}
 	}
-
+	
+	// process brackets
+	for (var i = 0; i < exp.length; i++ ) {
+		if (/\)/g.test(exp[i])) {
+			for (var j = i; j > -1; j--) {
+				if (/\(/g.test(exp[j])) {
+					var subexp = exp.splice(j + 1, i - 1);
+					exp.splice(j, 2, parseInput(subexp));
+					i--;
+					break;
+				}
+			}
+		}
+	}
+	
 	return parseInput(exp);
 }
 
@@ -285,6 +309,6 @@ function writeMessage(msg) {
 }
 
 function raiseError(msg) {
-	writeMessage('Error' + msg);
-	console.log('Error' + msg);
+	writeMessage('Error: ' + msg);
+	console.log('Error: ' + msg);
 }
