@@ -12,19 +12,19 @@ var dimData = {}; // global Dimensions dataset
 
 // Regular Expressions, keep search parameters
 var re = {
-	number: /([0-9])/g,
-	letter: /([A-Za-z])/g,
-	bracket: /([\(\)])/g,
-	operator: /([\+\-\*\/\=])/g,
-	nan: /([\+\-\*\/\^\=\(\)])/g
+	n: /([0-9])/g,  // numbers
+	l: /([A-Za-z])/g,  // letters
+	b: /([\(\)])/g,  // brackets
+	o: /([\+\-\*\/\=])/g,  // operators
+	nan: /([\+\-\*\/\^\=\(\)])/g  // NaN: Not a Number
 };
 // Regular Expressions, discard search parameters
 var red = {
-	number: /[0-9]/g,
-	letter: /[A-Za-z]/g,
-	bracket: /[\(\)]/g,
-	operator: /[\+\-\*\/\=]/g,
-	nan: /[\+\-\*\/\^\=\(\)]/g
+	n: /[0-9]/g,  // numbers
+	l: /[A-Za-z]/g,  // letters
+	b: /[\(\)]/g,  // brackets
+	o: /[\+\-\*\/\=]/g,  // operators
+	nan: /[\+\-\*\/\^\=\(\)]/g  // NaN: Not a Number
 };
 // Regular Expressions for operations
 var reo = {
@@ -169,7 +169,6 @@ function power (num1, num2) {
 		!num2.units[5] &&
 		!num2.units[6]
 	) {
-		console.log(Math.pow(num1.value, num2.value));
 		return new dim (
 			Math.pow(num1.value, num2.value),
 			[
@@ -181,7 +180,7 @@ function power (num1, num2) {
 				num1.units[5] * num2.value,
 				num1.units[6] * num2.value
 			]
-		)
+		);
 	} else {
 		raiseError('Cannot raise to power of a dimensioned value');
 	}
