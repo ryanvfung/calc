@@ -6,32 +6,6 @@
  * Date last modified: 2015-04-21
  */
 
-var baseUnits = ['kg', 'm', 's', 'A', 'K', 'mol', 'cd'];
-var unitData = {}; // global units dataset
-var dimData = {}; // global Dimensions dataset
-
-// Regular Expressions, keep search parameters
-var re = {
-	n: /([0-9])/g,  // numbers
-	l: /([A-Za-z])/g,  // letters
-	b: /([\(\)])/g,  // brackets
-	o: /([\+\-\*\/\=])/g,  // operators
-	nan: /([\+\-\*\/\^\=\(\)])/g  // NaN: Not a Number
-};
-// Regular Expressions, discard search parameters
-var red = {
-	n: /[0-9]/g,  // numbers
-	l: /[A-Za-z]/g,  // letters
-	b: /[\(\)]/g,  // brackets
-	o: /[\+\-\*\/\=]/g,  // operators
-	nan: /[\+\-\*\/\^\=\(\)]/g  // NaN: Not a Number
-};
-// Regular Expressions for operations
-var reo = {
-	1: /[\^]/g,
-	2: /[*\/]/g,
-	3: /[\+\-]/g
-}
 
 window.onload = function() {
 	$('#scicalcSubmit').on('click', function () {
@@ -52,11 +26,42 @@ window.onload = function() {
 	}
 }
 
+var baseUnits = ['kg', 'm', 's', 'A', 'K', 'mol', 'cd'];
+var unitData = {}; // global units dataset
+var dimData = {}; // global Dimensions dataset
+
+// Regular Expressions, keep search parameters
+var re = {
+	n: /([0-9])/g,  // numbers
+	l: /([A-Za-z])/g,  // letters
+	b: /([\(\)])/g,  // brackets
+	o: /([\+\-\*\/\=])/g,  // operators
+	nan: /([\+\-\*\/\^\=\(\)])/g,  // NaN: Not a Number
+	p: /([pn\u03bcmcdhkMGT])/g // prefixes
+};
+
+// Regular Expressions, discard search parameters
+var red = {
+	n: /[0-9]/g,  // numbers
+	l: /[A-Za-z]/g,  // letters
+	b: /[\(\)]/g,  // brackets
+	o: /[\+\-\*\/\=]/g,  // operators
+	nan: /[\+\-\*\/\^\=\(\)]/g,  // NaN: Not a Number
+	p: /[pn\u03bcmcdhkMGT]/g // prefixes
+};
+
+// Regular Expressions for operations
+var reo = {
+	1: /[\^]/g,
+	2: /[*\/]/g,
+	3: /[\+\-]/g
+}
+
 function parseInput(exp){ // parse input expression
 
 	// perform priority 1 operations
 	for (var i = 1; i < exp.length - 1; i++) {
-		if (!(exp[i] instanceof dim)) {
+		if (!(exp[i] instanceof qty)) {
 			if (exp[i].split(reo[1]).join('')=='') {
 				// perform exponentiation
 				if (exp[i] == '^') {
@@ -69,7 +74,7 @@ function parseInput(exp){ // parse input expression
 	
 	// perform priority 2 operations
 	for (var i = 1; i < exp.length - 1; i++) {
-		if (!(exp[i] instanceof dim)) {
+		if (!(exp[i] instanceof qty)) {
 			if (exp[i].split(reo[2]).join('')=='') {
 				// perform multiplication
 				if (exp[i] == '*') {
@@ -88,7 +93,7 @@ function parseInput(exp){ // parse input expression
 	// perform priority 3 operations
 	for (var i = 1; i < exp.length - 1; i++) {
 //		console.log("exp[i].split(reo[1]).join('')  =  "+String(exp[i].split(reo[3]).join('')));
-		if (!(exp[i] instanceof dim)) {
+		if (!(exp[i] instanceof qty)) {
 			if (exp[i].split(reo[3]).join('')=='') {
 				// perform addition
 				if (exp[i] == '+') {
@@ -122,7 +127,7 @@ function checkInput (input) {
 	}
 }
 
-function processInput (input) {
+function processInput (input) {	
 	var exp = input.split(re.nan);
 	
 	// remove extra array item at start if input string starts with something that is not a number
@@ -138,7 +143,7 @@ function processInput (input) {
 	// convert numbers to object
 	for (var i = 0; i < exp.length; i++) {
 		if (!re.nan.test(exp[i])) {
-			exp[i] = new dim(Number(exp[i]), 0);
+			exp[i] = new qty(Number(exp[i]), 0);
 		}
 	}
 	
@@ -159,26 +164,26 @@ function processInput (input) {
 	return parseInput(exp);
 }
 
-function power (num1, num2) {
+function power (qty1, qty2) {
 	if (
-		!num2.units[0] &&
-		!num2.units[1] &&
-		!num2.units[2] &&
-		!num2.units[3] &&
-		!num2.units[4] &&
-		!num2.units[5] &&
-		!num2.units[6]
+		!qty2.units[0] &&
+		!qty2.units[1] &&
+		!qty2.units[2] &&
+		!qty2.units[3] &&
+		!qty2.units[4] &&
+		!qty2.units[5] &&
+		!qty2.units[6]
 	) {
-		return new dim (
-			Math.pow(num1.value, num2.value),
+		return new qty (
+			Math.pow(qty1.value, qty2.value),
 			[
-				num1.units[0] * num2.value,
-				num1.units[1] * num2.value,
-				num1.units[2] * num2.value,
-				num1.units[3] * num2.value,
-				num1.units[4] * num2.value,
-				num1.units[5] * num2.value,
-				num1.units[6] * num2.value
+				qty1.units[0] * qty2.value,
+				qty1.units[1] * qty2.value,
+				qty1.units[2] * qty2.value,
+				qty1.units[3] * qty2.value,
+				qty1.units[4] * qty2.value,
+				qty1.units[5] * qty2.value,
+				qty1.units[6] * qty2.value
 			]
 		);
 	} else {
@@ -186,33 +191,33 @@ function power (num1, num2) {
 	}
 }
 
-function multiply (num1, num2) {
-	return new dim (
-		num1.value * num2.value,
+function multiply (qty1, qty2) {
+	return new qty (
+		qty1.value * qty2.value,
 		[
-			num1.units[0] + num2.units[0],
-			num1.units[1] + num2.units[1],
-			num1.units[2] + num2.units[2],
-			num1.units[3] + num2.units[3],
-			num1.units[4] + num2.units[4],
-			num1.units[5] + num2.units[5],
-			num1.units[6] + num2.units[6]
+			qty1.units[0] + qty2.units[0],
+			qty1.units[1] + qty2.units[1],
+			qty1.units[2] + qty2.units[2],
+			qty1.units[3] + qty2.units[3],
+			qty1.units[4] + qty2.units[4],
+			qty1.units[5] + qty2.units[5],
+			qty1.units[6] + qty2.units[6]
 		]
 	);
 }
 
-function divide (num1, num2) {
-	if ( num2.value != 0 ) {
-		return new dim(
-			num1.value / num2.value,
+function divide (qty1, qty2) {
+	if ( qty2.value != 0 ) {
+		return new qty(
+			qty1.value / qty2.value,
 			[
-				num1.units[0] - num2.units[0],
-				num1.units[1] - num2.units[1],
-				num1.units[2] - num2.units[2],
-				num1.units[3] - num2.units[3],
-				num1.units[4] - num2.units[4],
-				num1.units[5] - num2.units[5],
-				num1.units[6] - num2.units[6]
+				qty1.units[0] - qty2.units[0],
+				qty1.units[1] - qty2.units[1],
+				qty1.units[2] - qty2.units[2],
+				qty1.units[3] - qty2.units[3],
+				qty1.units[4] - qty2.units[4],
+				qty1.units[5] - qty2.units[5],
+				qty1.units[6] - qty2.units[6]
 			]
 		);
 	} else {
@@ -220,27 +225,27 @@ function divide (num1, num2) {
 	}
 }
 
-function add (num1, num2) {
+function add (qty1, qty2) {
 	if (
-		num1.units[0] == num2.units[0] &&
-		num1.units[1] == num2.units[1] &&
-		num1.units[2] == num2.units[2] &&
-		num1.units[3] == num2.units[3] &&
-		num1.units[4] == num2.units[4] &&
-		num1.units[5] == num2.units[5] &&
-		num1.units[6] == num2.units[6]
+		qty1.units[0] == qty2.units[0] &&
+		qty1.units[1] == qty2.units[1] &&
+		qty1.units[2] == qty2.units[2] &&
+		qty1.units[3] == qty2.units[3] &&
+		qty1.units[4] == qty2.units[4] &&
+		qty1.units[5] == qty2.units[5] &&
+		qty1.units[6] == qty2.units[6]
 	) {
-		return new dim(num1.value + num2.value, num1.units);
+		return new qty(qty1.value + qty2.value, qty1.units);
 	} else {
 		raiseError('Dimension mismatch');
 	}
 }
 
-function subtract (num1, num2) {
-	return add(num1, new dim(-num2.value, num2.units));
+function subtract (qty1, qty2) {
+	return add(qty1, new qty(-qty2.value, qty2.units));
 }
 
-function dim(value, units) { // new Dimension
+function qty(value, units) { // new Dimension
 	this.value = value;
 	if (units == 0) {
 		this.units = [0,0,0,0,0,0,0];
@@ -248,25 +253,25 @@ function dim(value, units) { // new Dimension
 		this.units = units;
 	}
 	this.equal = function (arg) {
-		if (arg instanceof dim) {
+		if (arg instanceof qty) {
 			return this.identical(arg);
 		} else if (typeof(arg=='number')) {
 			return this.value == arg
 		}
 	}
 	this.identical = function (arg) {
-		if (arg instanceof dim) {
-			return this.identical(dim2);
+		if (arg instanceof qty) {
+			return this.identical(qty2);
 			if (
-				this.value == dim2.value &&
-				this.units[0] == dim2.units[0] &&
-				this.units[1] == dim2.units[1] &&
-				this.units[2] == dim2.units[2] &&
-				this.units[3] == dim2.units[3] &&
-				this.units[4] == dim2.units[4] &&
-				this.units[5] == dim2.units[5] &&
-				this.units[6] == dim2.units[6]
-				// && this.mag == dim2.mag
+				this.value == qty2.value &&
+				this.units[0] == qty2.units[0] &&
+				this.units[1] == qty2.units[1] &&
+				this.units[2] == qty2.units[2] &&
+				this.units[3] == qty2.units[3] &&
+				this.units[4] == qty2.units[4] &&
+				this.units[5] == qty2.units[5] &&
+				this.units[6] == qty2.units[6]
+				// && this.mag == qty2.mag
 			) {
 				return true;
 			} else {
@@ -277,11 +282,11 @@ function dim(value, units) { // new Dimension
 		}
 	}
 }
-dim.prototype.toString = function () {return String(this.value)};
+qty.prototype.toString = function () {return String(this.value)};
 
 
 function makeNum(id, value, units) {
-	dimData[id] = new dim(value,units);
+	dimData[id] = new qty(value,units);
 }
 
 function ungroup(s) { // extract expression from inside round brackets
