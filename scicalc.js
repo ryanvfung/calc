@@ -127,7 +127,12 @@ function checkInput (input) {
 	}
 }
 
-function processInput (input) {	
+function processInput (input) {
+
+	// 287 J kg^-1 K^-1
+	// num unit[^int] [*/ unit[^int]]
+	// num unit[^int] [* unit[^int]] [/  (unit[^int] [* unit[^int]])]
+	
 	var exp = input.split(re.nan);
 	
 	// remove extra array item at start if input string starts with something that is not a number
