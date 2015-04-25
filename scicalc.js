@@ -125,8 +125,12 @@ function parseInput(exp){ // parse input expression
 
 function checkInput (input) {
 	if ( input.split(/\s/g).join('') !== '' ) {
-		var result = processInput(input);
-		console.log(result);
+		var resultqty = processInput(input);
+		console.log(resultqty);
+		var result = resultqty.value
+		if ( siUnits2[resultqty.units] ) {
+			result += ' ' + siUnits2[resultqty.units];
+		}
 		writeMessage(input + ' = ' + result);
 	}
 }
